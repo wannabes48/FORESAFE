@@ -84,7 +84,7 @@ export default function AdminPage() {
             const folder = zip.folder("foresafe_qrs")
 
             for (const tag of tags) {
-                const url = `https://foresafe.in/s/${tag.tag_id}`
+                const url = `https://foresafe.vercel.app/s/${tag.tag_id}`
                 const qrDataUrl = await QRCode.toDataURL(url, { width: 500, margin: 2 })
 
                 // Remove header "data:image/png;base64,"
@@ -166,7 +166,7 @@ export default function AdminPage() {
                             {generating ? "Generating batch..." : "Download All QR Codes (.zip)"}
                         </Button>
                         <p className="text-xs text-gray-500 mt-2 text-center">
-                            Generates QR codes for ALL tags in database pointing to <code>foresafe.in/s/[tagId]</code>.
+                            Generates QR codes for ALL tags in database pointing to <code>foresafe.vercel.app/s/[tagId]</code>.
                         </p>
                     </div>
 

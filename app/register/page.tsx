@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/Input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { supabase } from "@/lib/supabaseClient"
 
+import { countryCodes } from "@/lib/countries"
+
 function RegisterForm() {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -16,6 +18,8 @@ function RegisterForm() {
     const initialTag = searchParams.get("tag") || ""
     const [tagId, setTagId] = useState(initialTag)
     const [whatsapp, setWhatsapp] = useState("")
+    const [countryCode, setCountryCode] = useState("+91") // Default to +91 or +254 based on preference, let's stick to +254 as it seems to be an African context app based on previous chats or +91 as per previous code. The user prompt had +91 in description but +254 in list. I'll stick to +254 as a default closer to "FORESAFE" sounding name, but actually previous code had +91. Let's use +254 (Kenya) as default if it's Siro linked, or just +254. Wait, "Siro" -> mostly Kenyan.
+
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
@@ -39,9 +43,12 @@ function RegisterForm() {
         // Best UX: Prepend +91 visually or in logic.
         // I'll prepend +91 for this MVP if not present.
         let phone = whatsapp.trim().replace(/\D/g, "") // remove non-digits
-        if (phone.length === 10) {
-            phone = "91" + phone
-        }
+        // Remove leading zeros if any
+        phone = phone.replace(/^0+/, "")
+        // Combine country code (without +) and phone
+        // countryCode is like "+254", so remove +
+        const code = countryCode.replace("+", "")
+        phone = code + phone
 
         // Check DB
         try {
@@ -143,23 +150,31 @@ function RegisterForm() {
                             WhatsApp Number
                         </label>
                         <div className="flex">
-                            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
-                                +91
-                            </span>
+                            <select
+                                className="flex h-9 w-[110px] items-center justify-between whitespace-nowrap rounded-l-md border border-r-0 border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                                value={countryCode}
+                                onChange={(e) => setCountryCode(e.target.value)}
+                            >
+                                {countryCodes.map((c) => (
+                                    <option key={c.code + c.country} value={c.code}>
+                                        {c.code} ({c.country})
+                                    </option>
+                                ))}
+                            </select>
                             <Input
                                 id="whatsapp"
-                                placeholder="9876543210"
+                                placeholder="Phone number"
                                 className="rounded-l-none"
                                 value={whatsapp}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWhatsapp(e.target.value)}
                                 type="tel"
                                 required
-                                pattern="[0-9]{10}"
-                                title="Please enter a valid 10-digit mobile number"
+                                pattern="[0-9]{1,15}"
+                                title="Please enter a valid mobile number"
                             />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            We will use this number to send you alerts.
+                            Select your country code and enter your number.
                         </p>
                     </div>
                     {message?.type === 'error' && (
@@ -178,7 +193,7 @@ function RegisterForm() {
                     By registering, you agree to our Terms of Service.
                 </p>
             </CardFooter>
-        </Card>
+        </Card >
     )
 }
 

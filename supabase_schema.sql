@@ -31,5 +31,58 @@ with check (is_registered = true);
 -- Note: service_role bypasses RLS by default, but explicit policy can be good documentation.
 -- No explicit policy needed for service_role usually if not restrictive.
 
--- Create an index on tag_id for faster lookups (though primary key is already indexed)
--- create index tags_tag_id_idx on public.tags (tag_id);
+
+-- Create profiles to handle user roles
+create table public.profiles (
+  id uuid references auth.users not null primary key,
+  role text not null default 'user',
+  email text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.profiles enable row level security;
+
+-- Policies for profiles
+create policy "Public profiles are viewable by everyone."
+  on profiles for select
+  using ( true );
+
+create policy "Users can insert their own profile."
+  on profiles for insert
+  with check ( auth.uid() = id );
+
+create policy "Users can update own profile."
+  on profiles for update
+  using ( auth.uid() = id );
+
+-- Function to handle new user signup
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, role)
+  values (new.id, new.email, 'user');
+  return new;
+end;
+$$;
+
+-- Trigger the function every time a user is created
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Secure the tags table for admins
+-- Add policy to allow admins full access to tags
+create policy "Admins can view all tags"
+  on public.tags
+  for all
+  using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid()
+      and profiles.role = 'admin'
+    )
+  );
+

@@ -137,7 +137,7 @@ export default function Home() {
               <Link href="mailto:support@foresafe.in">
                 <Button variant="secondary" className="mr-4">Email Support</Button>
               </Link>
-              <Link href="https://wa.me/91XXXXXXXXXX" target="_blank">
+              <Link href="https://wa.me/+254745131817" target="_blank">
                 <Button variant="outline">WhatsApp Helpdesk</Button>
               </Link>
             </div>
@@ -149,8 +149,13 @@ export default function Home() {
       <footer className="py-6 w-full shrink-0 items-center px-4 md:px-6 border-t flex flex-col sm:flex-row justify-between gap-4">
         <p className="text-xs text-gray-500 dark:text-gray-400">
           © {new Date().getFullYear()} FORESAFE. All rights reserved.
+          <br />
+          A CRAFT OF SIRO PRODUCTION
         </p>
         <nav className="flex gap-4 sm:gap-6">
+          <Link className="text-xs hover:underline underline-offset-4" href="/admin/login">
+            Admin Login
+          </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="#">
             Terms of Service
           </Link>

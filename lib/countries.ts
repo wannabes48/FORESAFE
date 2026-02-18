@@ -1,0 +1,28 @@
+export const countryCodes = [
+    { code: "+254", country: "Kenya" },
+    { code: "+1", country: "United States/Canada" },
+    { code: "+44", country: "United Kingdom" },
+    { code: "+61", country: "Australia" },
+    { code: "+86", country: "China" },
+    { code: "+33", country: "France" },
+    { code: "+49", country: "Germany" },
+    { code: "+81", country: "Japan" },
+    { code: "+971", country: "UAE" },
+    { code: "+966", country: "Saudi Arabia" },    
+    { code: "+255", country: "Tanzania" },
+    { code: "+256", country: "Uganda" },
+    { code: "+250", country: "Rwanda" },
+    { code: "+27", country: "South Africa" },
+    { code: "+234", country: "Nigeria" },
+    { code: "+20", country: "Egypt" },
+    { code: "+65", country: "Singapore" },
+    { code: "+60", country: "Malaysia" },
+    { code: "+62", country: "Indonesia" },
+    { code: "+55", country: "Brazil" },
+    { code: "+52", country: "Mexico" },
+    { code: "+7", country: "Russia" },
+    { code: "+39", country: "Italy" },
+    { code: "+34", country: "Spain" },
+    
+    // Add more as needed
+].sort((a, b) => a.country.localeCompare(b.country));
