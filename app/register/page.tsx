@@ -23,6 +23,7 @@ function RegisterForm() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
+
     // If tag comes from URL, we might want to lock it or just pre-fill
     // "Tag ID (Read-only if coming from a redirect)" -> Let's make it readonly if present in URL?
     // User might want to change it if they scanned wrong one? But usually scan is accurate.
@@ -55,7 +56,7 @@ function RegisterForm() {
             // 1. Check if tag exists and is available
             const { data: tagData, error: fetchError } = await supabase
                 .from('tags')
-                .select('*')
+                .select('is_registered')
                 .eq('tag_id', formattedTag)
                 .single()
 
@@ -84,6 +85,8 @@ function RegisterForm() {
                 throw updateError
             }
 
+            router.push(`/register/success?id=${tagId.toUpperCase()}`);
+
             setMessage({ type: 'success', text: "Tag Registered! Your vehicle is now protected." })
             setTimeout(() => {
                 // Redirect to scanning page or dashboard? 
@@ -109,10 +112,12 @@ function RegisterForm() {
                     <CardTitle>Registration Successful!</CardTitle>
                     <CardDescription>
                         Your vehicle tag <strong>{tagId}</strong> is active.
+                        <br />
+                        <span className="text-sm text-gray-500">Please print and place your tag on your vehicle.</span>
                     </CardDescription>
                 </CardHeader>
                 <CardFooter className="flex justify-center">
-                    <Button onClick={() => router.push('/')}>Return Home</Button>
+                    <Button onClick={() => router.push('/register/success/' + tagId)}>View Tag</Button>
                 </CardFooter>
             </Card>
         )

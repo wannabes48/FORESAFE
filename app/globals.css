@@ -78,3 +78,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  #printable-tag {
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+    margin: 0 auto;
+  }
+}
