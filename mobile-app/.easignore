@@ -1,0 +1,16 @@
+# Exclude dependencies
+node_modules/
+
+# Exclude local build artifacts
+android/
+ios/
+bin/
+build/
+
+# Exclude environment secrets (EAS handles these separately)
+.env
+.env.local
+
+# Exclude system files
+.DS_Store
+Thumbs.db

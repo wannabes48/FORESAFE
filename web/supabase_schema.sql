@@ -2,6 +2,7 @@
 create table public.tags (
   tag_id text primary key,
   whatsapp_number text,
+  push_token text,
   is_registered boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -85,4 +86,8 @@ create policy "Admins can view all tags"
       and profiles.role = 'admin'
     )
   );
+
+-- MIGRATION: Run this if your 'tags' table already exists but lacks these columns
+ALTER TABLE public.tags ADD COLUMN IF NOT EXISTS push_token text;
+ALTER TABLE public.tags ADD COLUMN IF NOT EXISTS push_enabled boolean DEFAULT true;
 

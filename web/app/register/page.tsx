@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Shield, Loader2, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -18,18 +18,28 @@ function RegisterForm() {
     const initialTag = searchParams.get("tag") || ""
     const [tagId, setTagId] = useState(initialTag)
     const [whatsapp, setWhatsapp] = useState("")
-    const [countryCode, setCountryCode] = useState("+91") // Default to +91 or +254 based on preference, let's stick to +254 as it seems to be an African context app based on previous chats or +91 as per previous code. The user prompt had +91 in description but +254 in list. I'll stick to +254 as a default closer to "FORESAFE" sounding name, but actually previous code had +91. Let's use +254 (Kenya) as default if it's Siro linked, or just +254. Wait, "Siro" -> mostly Kenyan.
+    const [countryCode, setCountryCode] = useState("+91")
+    const [pushToken, setPushToken] = useState<string | null>(null)
 
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-
-    // If tag comes from URL, we might want to lock it or just pre-fill
-    // "Tag ID (Read-only if coming from a redirect)" -> Let's make it readonly if present in URL?
-    // User might want to change it if they scanned wrong one? But usually scan is accurate.
-    // I'll leave it editable but pre-filled, or maybe read-only if it looks like a valid tag.
-    // Let's stick to prompt: "Read-only if coming from a redirect".
     const isTagReadOnly = !!initialTag
+
+    // Simulate push token collection
+    useEffect(() => {
+        if ("Notification" in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    // In a real app, you'd get the FCM token here
+                    // const token = await getToken(messaging, { vapidKey: '...' });
+                    const mockToken = "mock-fcm-token-" + Math.random().toString(36).substr(2, 9);
+                    setPushToken(mockToken);
+                    console.log("Push token generated:", mockToken);
+                }
+            });
+        }
+    }, []);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -37,23 +47,12 @@ function RegisterForm() {
         setMessage(null)
 
         const formattedTag = tagId.trim().toUpperCase()
-        // Basic validation for phone number (assuming user enters local number, we prepend default country code if missing or just store as is?)
-        // Prompt: "WhatsApp Number (Input with a country code prefix +91)"
-        // I will assume the input is just the number and I prepend +91 for now, or user enters full.
-        // Let's enforce a simple pattern or just take input. 
-        // Best UX: Prepend +91 visually or in logic.
-        // I'll prepend +91 for this MVP if not present.
-        let phone = whatsapp.trim().replace(/\D/g, "") // remove non-digits
-        // Remove leading zeros if any
+        let phone = whatsapp.trim().replace(/\D/g, "")
         phone = phone.replace(/^0+/, "")
-        // Combine country code (without +) and phone
-        // countryCode is like "+254", so remove +
         const code = countryCode.replace("+", "")
         phone = code + phone
 
-        // Check DB
         try {
-            // 1. Check if tag exists and is available
             const { data: tagData, error: fetchError } = await supabase
                 .from('tags')
                 .select('is_registered')
@@ -72,27 +71,19 @@ function RegisterForm() {
                 return
             }
 
-            // 2. Register (Update)
             const { error: updateError } = await supabase
                 .from('tags')
                 .update({
                     whatsapp_number: phone,
+                    push_token: pushToken,
                     is_registered: true
                 })
                 .eq('tag_id', formattedTag)
 
-            if (updateError) {
-                throw updateError
-            }
+            if (updateError) throw updateError
 
             router.push(`/register/success?id=${tagId.toUpperCase()}`);
-
             setMessage({ type: 'success', text: "Tag Registered! Your vehicle is now protected." })
-            setTimeout(() => {
-                // Redirect to scanning page or dashboard? 
-                // Maybe just stay here showing success.
-                // Prompt: "Success State: Show a confirmation message"
-            }, 2000)
 
         } catch (error) {
             console.error(error)
